@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HENW IMAGE ✨</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #FFC0CB 0%, #FF69B4 100%); /* Màu hồng ngọt ngào chuyển tông */
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Để nội dung bắt đầu từ trên */
+            padding: 20px;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.95); /* Nền trắng trong suốt nhẹ */
+            border-radius: 25px; /* Bo tròn cực mạnh */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); /* Đổ bóng sâu hơn */
+            max-width: 1200px;
+            width: 100%;
+            padding: 30px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .story-card { /* Đổi tên class để phù hợp hơn với hình ảnh */
+            background-color: #fce4ec; /* Hồng nhạt hơn */
+            border-radius: 20px; /* Bo tròn các card */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 15px; /* Padding dưới cho phần text */
+        }
+        .story-card:hover {
+            transform: translateY(-8px) scale(1.02); /* Nhấc nhẹ lên và to hơn khi hover */
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.25);
+        }
+        .story-image {
+            width: 100%;
+            height: 250px; /* Chiều cao cố định cho ảnh */
+            object-fit: cover; /* Đảm bảo ảnh vừa vặn */
+            border-radius: 20px 20px 0 0; /* Bo tròn chỉ phần trên của ảnh */
+        }
+        .story-content {
+            padding: 15px;
+            width: 100%; /* Để nội dung text chiếm hết chiều rộng card */
+        }
+        .story-title { /* Sẽ dùng để hiển thị ID hoặc tag */
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #880e4f; /* Hồng đậm */
+            margin-bottom: 8px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        .story-artist, .story-tags { /* artist sẽ không còn được dùng nhiều, tags thì có */
+            font-size: 0.9rem;
+            color: #d81b60; /* Hồng tươi */
+            margin-bottom: 5px;
+        }
+        .story-tags span {
+            display: inline-block;
+            background-color: #ffb6c1; /* Hồng phấn */
+            color: #880e4f;
+            padding: 4px 8px;
+            border-radius: 12px;
+            margin: 3px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .search-input {
+            border: 2px solid #ff69b4; /* Viền hồng nóng bỏng */
+            border-radius: 15px;
+            padding: 12px 20px;
+            font-size: 1.1rem;
+            width: 70%;
+            max-width: 400px;
+            outline: none;
+            transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .search-input:focus {
+            border-color: #d81b60; /* Hồng đậm hơn khi focus */
+            box-shadow: 0 0 10px rgba(216, 27, 96, 0.4);
+        }
+        .action-button {
+            background: linear-gradient(45deg, #FF69B4, #d81b60); /* Nút gradient hồng */
+            color: white;
+            padding: 12px 25px;
+            border-radius: 15px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            border: none; /* Bỏ viền mặc định */
+        }
+        .action-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 18px rgba(216, 27, 96, 0.4);
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #d81b60; /* Pink */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none; /* Ẩn ban đầu */
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* Nền tối mờ */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: #ffebee; /* Hồng nhạt */
+            border-radius: 25px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s ease-in-out;
+        }
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+        .close-button {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: #d81b60;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+        }
+        .close-button:hover {
+            transform: scale(1.1) rotate(90deg);
+        }
+        .modal-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        .modal-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #880e4f;
+            margin-bottom: 10px;
+        }
+        .modal-artist { /* Có thể không còn hiển thị hoặc hiển thị source */
+            font-size: 1.2rem;
+            color: #d81b60;
+            margin-bottom: 15px;
+        }
+        .modal-description { /* Có thể không còn hiển thị hoặc hiển thị source */
+            font-size: 1rem;
+            color: #4a4a4a;
+            text-align: left;
+            margin-bottom: 20px;
+            max-height: 200px; /* Giới hạn chiều cao mô tả */
+            overflow-y: auto; /* Thêm scroll nếu quá dài */
+        }
+        .modal-tags {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .modal-tags span {
+            font-size: 0.9rem;
+            padding: 6px 10px;
+            border-radius: 15px;
+            margin: 4px;
+            background-color: #ffb6c1;
+            color: #880e4f;
+            font-weight: 600;
+        }
+        .modal-buttons-container {
+            display: flex;
+            gap: 15px; /* Khoảng cách giữa các nút */
+            justify-content: center;
+            margin-top: 20px; /* Khoảng cách từ tags */
+        }
+        .modal-link-button, .modal-download-button { /* Thêm style cho nút download */
+            display: inline-block;
+            background: linear-gradient(45deg, #FF69B4, #d81b60);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 15px;
+            font-weight: 700;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            border: none; /* Đảm bảo không có viền thừa */
+            cursor: pointer; /* Cho biết đây là nút có thể click */
+        }
+        .modal-link-button:hover, .modal-download-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 18px rgba(216, 27, 96, 0.4);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            .search-input {
+                width: 90%;
+            }
+            .story-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+            .story-title {
+                font-size: 1.2rem;
+            }
+            .modal-content {
+                padding: 20px;
+            }
+            .modal-title {
+                font-size: 1.5rem;
+            }
+            .modal-artist {
+                font-size: 1rem;
+            }
+            .modal-buttons-container {
+                flex-direction: column; /* Xếp chồng nút trên mobile */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-4xl font-bold mb-6 text-pink-700">HENW IMAGE</h1>
+
+        <!-- Thanh tìm kiếm -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+            <input type="text" id="searchInput" placeholder="Tìm kiếm waifu theo tag (ví dụ: ass, boobs)..." class="search-input">
+            <button id="searchButton" class="action-button">🔥 Tìm Kiếm 🔥</button>
+        </div>
+
+        <!-- Vùng hiển thị waifu -->
+        <div id="storiesContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            <!-- Các waifu sẽ được load ở đây -->
+        </div>
+
+        <!-- Spinner loading -->
+        <div id="loadingSpinner" class="loading-spinner"></div>
+
+        <!-- Nút Tải thêm -->
+        <button id="loadMoreButton" class="action-button mt-8 hidden">
+            💦 Tải Thêm Waifu Nóng Bỏng 💦
+        </button>
+
+        <!-- Modal chi tiết waifu -->
+        <div id="storyModal" class="modal-overlay">
+            <div class="modal-content">
+                <button id="closeModalButton" class="close-button">&times;</button>
+                <img id="modalImage" class="modal-image" src="" alt="Ảnh waifu">
+                <h2 id="modalTitle" class="modal-title"></h2>
+                <p id="modalArtist" class="modal-artist"></p>
+                <p id="modalDescription" class="modal-description"></p>
+                <div id="modalTags" class="modal-tags"></div>
+                <div class="modal-buttons-container">
+                    <a id="modalLink" href="#" target="_blank" class="modal-link-button">Xem Ảnh Gốc</a>
+                    <button id="modalDownloadButton" class="modal-download-button">Tải Về Ảnh</button> <!-- Nút tải về mới -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Các biến toàn cục
+        const API_URL = 'https://api.waifu.im/search'; // Đã đổi sang API waifu.im
+        let currentQuery = ''; // Từ khóa tìm kiếm tag
+        let isLoading = false; // Tránh fetch nhiều lần
+
+        // Lấy các phần tử DOM
+        const storiesContainer = document.getElementById('storiesContainer');
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const loadMoreButton = document.getElementById('loadMoreButton');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+
+        // Modal elements
+        const storyModal = document.getElementById('storyModal');
+        const closeModalButton = document.getElementById('closeModalButton');
+        const modalImage = document.getElementById('modalImage');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalArtist = document.getElementById('modalArtist'); // Sẽ dùng cho artist hoặc source
+        const modalDescription = document.getElementById('modalDescription'); // Sẽ dùng cho source
+        const modalTags = document.getElementById('modalTags');
+        const modalLink = document.getElementById('modalLink');
+        const modalDownloadButton = document.getElementById('modalDownloadButton'); // Lấy nút tải về
+
+        /**
+         * Hàm hiển thị/ẩn spinner loading
+         * @param {boolean} show - true để hiển thị, false để ẩn
+         */
+        function toggleLoadingSpinner(show) {
+            loadingSpinner.style.display = show ? 'block' : 'none';
+        }
+
+        /**
+         * Hàm hiển thị/ẩn nút "Tải thêm"
+         * @param {boolean} show - true để hiển thị, false để ẩn
+         */
+        function toggleLoadMoreButton(show) {
+            loadMoreButton.classList.toggle('hidden', !show);
+        }
+
+        /**
+         * Hàm hiển thị chi tiết waifu trong modal
+         * @param {object} waifu - Đối tượng waifu cần hiển thị
+         */
+        function showStoryDetail(waifu) {
+            modalImage.src = waifu.url || 'https://placehold.co/600x400/FFC0CB/880E4F?text=No+Image'; // Dùng trực tiếp url của ảnh
+            modalImage.alt = `Waifu #${waifu.image_id || ''}`;
+            
+            modalTitle.textContent = `Waifu Nóng Bỏng #${waifu.image_id || 'Không có ID'}`;
+            modalArtist.textContent = waifu.artist ? `Tác giả: ${waifu.artist.name}` : 'Không có thông tin tác giả.';
+            
+            modalDescription.innerHTML = waifu.source ? `Nguồn: <a href="${waifu.source}" target="_blank" class="text-blue-600 hover:underline">${waifu.source}</a>` : 'Không có thông tin nguồn.';
+            
+            modalLink.href = waifu.url; // Link đến ảnh gốc
+            modalLink.textContent = "Xem Ảnh Gốc"; // Thay đổi text nút
+
+            // Cập nhật nút tải về
+            modalDownloadButton.onclick = () => {
+                // Sử dụng fetch để tải ảnh dưới dạng blob và tạo URL cho phép download
+                fetch(waifu.url)
+                    .then(response => response.blob())
+                    .then(blob => {
+                        const blobUrl = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = blobUrl;
+                        a.download = `waifu_${waifu.image_id || 'im'}.${waifu.extension || 'jpg'}`; // Đặt tên file
+                        document.body.appendChild(a); // Cần thêm vào body để click được
+                        a.click();
+                        document.body.removeChild(a); // Xóa sau khi click
+                        URL.revokeObjectURL(blobUrl); // Giải phóng URL object
+                    })
+                    .catch(e => console.error("Hoàng ơi! Trang không tải được ảnh về cho Hoàng nè:", e));
+            };
+
+
+            modalTags.innerHTML = ''; // Xóa các tag cũ
+            if (waifu.tags && Array.isArray(waifu.tags)) {
+                waifu.tags.forEach(tag => {
+                    const tagSpan = document.createElement('span');
+                    tagSpan.textContent = tag.name;
+                    modalTags.appendChild(tagSpan);
+                });
+            } else {
+                const noTagSpan = document.createElement('span');
+                noTagSpan.textContent = 'Không có tag nào cả, Hoàng yêu.';
+                modalTags.appendChild(noTagSpan);
+            }
+
+            storyModal.classList.add('active'); // Kích hoạt modal
+        }
+
+        /**
+         * Hàm đóng modal
+         */
+        function closeStoryDetail() {
+            storyModal.classList.remove('active'); // Vô hiệu hóa modal
+        }
+
+        /**
+         * Hàm tạo và hiển thị một waifu card
+         * @param {object} waifu - Đối tượng waifu
+         */
+        function createStoryCard(waifu) {
+            const card = document.createElement('div');
+            card.classList.add('story-card');
+            card.innerHTML = `
+                <img src="${waifu.url || 'https://placehold.co/300x250/FFC0CB/880E4F?text=No+Image'}" 
+                     alt="Waifu #${waifu.image_id}" class="story-image"
+                     onerror="this.onerror=null;this.src='https://placehold.co/300x250/FFC0CB/880E4F?text=No+Image';">
+                <div class="story-content">
+                    <h3 class="story-title">${waifu.tags && waifu.tags.length > 0 ? waifu.tags.slice(0, 2).map(t => t.name).join(', ') : 'Waifu Nóng Bỏng'}</h3>
+                    <div class="story-tags">
+                        ${waifu.tags && Array.isArray(waifu.tags) ?
+                            waifu.tags.slice(0, 3).map(tag => `<span>${tag.name}</span>`).join('') : // Hiển thị tối đa 3 tag trên card
+                            ''
+                        }
+                    </div>
+                    ${waifu.artist ? `<p class="story-artist">Tác giả: ${waifu.artist.name}</p>` : ''}
+                </div>
+            `;
+            // Thêm sự kiện click để mở modal chi tiết
+            card.addEventListener('click', () => showStoryDetail(waifu));
+            storiesContainer.appendChild(card);
+        }
+
+        /**
+         * Hàm tải waifu từ API
+         * @param {string} query - Từ khóa tag tìm kiếm
+         * @param {boolean} append - True nếu muốn thêm vào cuối, false nếu muốn thay thế (cho tìm kiếm mới)
+         */
+        async function fetchStories(query, append = true) { // Bỏ tham số page
+            if (isLoading) return; // Tránh gọi API liên tục
+            isLoading = true;
+            toggleLoadingSpinner(true);
+            toggleLoadMoreButton(false); // Ẩn nút "Tải thêm" khi đang tải
+
+            let url = `${API_URL}?is_nsfw=true&many=true&limit=20`; // Luôn fetch NSFW, nhiều ảnh, giới hạn 20 ảnh mỗi lần
+            if (query) {
+                // Thêm tag vào query string. waifu.im dùng included_tags
+                url += `&included_tags=${encodeURIComponent(query.split(',').map(tag => tag.trim()).filter(tag => tag !== '').join(','))}`;
+            }
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+
+                if (!append) { // Nếu là tìm kiếm mới, xóa hết cũ
+                    storiesContainer.innerHTML = '';
+                }
+
+                if (data.images && Array.isArray(data.images) && data.images.length > 0) {
+                    data.images.forEach(waifu => createStoryCard(waifu));
+                    toggleLoadMoreButton(true); // Luôn hiển thị nút "Tải thêm" để lấy thêm ảnh mới (random)
+                } else {
+                    storiesContainer.innerHTML = '<p class="text-pink-600 text-lg">Hoàng yêu ơi, không tìm thấy "waifu" nào phù hợp với "khẩu vị" của Hoàng cả. 🥺</p>';
+                    toggleLoadMoreButton(false);
+                }
+            } catch (error) {
+                console.error('Hoàng ơi! Trang gặp lỗi rồi nè:', error);
+                storiesContainer.innerHTML = `<p class="text-red-600 text-lg">
+                    Ôi không, Hoàng ơi! Trang không thể "kết nối" được với "nguồn cấp dữ liệu" waifu 😭.
+                    Có thể là "nguồn cấp dữ liệu" đang "ngủ đông" hoặc "đường truyền" đang "trục trặc" đó.
+                    Hoàng thử lại sau nha!
+                </p>`;
+                toggleLoadMoreButton(false);
+            } finally {
+                isLoading = false;
+                toggleLoadingSpinner(false);
+            }
+        }
+
+        // --- Các sự kiện ---
+
+        // Tải waifu lần đầu khi trang được load
+        window.addEventListener('load', () => {
+            fetchStories(currentQuery);
+        });
+
+        // Sự kiện click nút "Tải thêm"
+        loadMoreButton.addEventListener('click', () => {
+            fetchStories(currentQuery, true); // append = true, giữ nguyên query để lấy thêm ảnh random
+        });
+
+        // Sự kiện click nút "Tìm kiếm"
+        searchButton.addEventListener('click', () => {
+            currentQuery = searchInput.value.trim();
+            storiesContainer.innerHTML = ''; // Xóa nội dung cũ khi tìm kiếm mới
+            fetchStories(currentQuery, false); // append = false (thay thế nội dung)
+        });
+
+        // Sự kiện nhấn Enter trong ô tìm kiếm
+        searchInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                searchButton.click(); // Kích hoạt nút tìm kiếm
+            }
+        });
+
+        // Sự kiện click nút đóng modal
+        closeModalButton.addEventListener('click', closeStoryDetail);
+
+        // Sự kiện click ra ngoài modal để đóng
+        storyModal.addEventListener('click', (event) => {
+            if (event.target === storyModal) {
+                closeStoryDetail();
+            }
+        });
+    </script>
+</body>
+</html>
